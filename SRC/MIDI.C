@@ -99,6 +99,7 @@ static struct {
 	Bitu mpuport;
         Bitu sbport;
         Bitu serialport;
+        Bitu parallelport;
 	Bitu status;
 	Bitu cmd_len;
 	Bitu cmd_pos;
@@ -243,6 +244,40 @@ static void PlayMsg_Serial(Bit8u* msg,Bitu len)
 	}
 };
 
+static void PlayMsg_S2P(Bit8u* msg,Bitu len)
+{
+        _asm
+        {
+                        mov     bx,msg
+                        mov     cx,len
+                        add     cx,bx
+                        mov     dx,midi.parallelport
+                        inc     dx
+                        inc     dx
+        NextByte:       cmp     bx,cx
+                        je      End
+                        mov     al,03h
+                        out     dx,al
+                        dec     dx
+                        dec     dx
+                        mov     al,[bx]
+                        out     dx,al
+                        inc     dx
+                        inc     dx
+                        mov     al,07h
+                        out     dx,al
+                        in      al,dx                   ; Delay 3.5 microseconds
+                        in      al,dx
+                        in      al,dx
+                        in      al,dx
+                        in      al,dx
+                        in      al,dx
+                        inc     bx
+                        jmp     NextByte
+        End:
+        }
+}
+
 static void PlayMsg(Bit8u* msg,Bitu len)
 {
         switch (MIDI_output_mode)
@@ -296,6 +331,8 @@ static void PlayMsg(Bit8u* msg,Bitu len)
                 return PlayMsg_SBMIDI(msg,len);
         case M_SERIAL:
                 return PlayMsg_Serial(msg,len);
+        case M_S2P:
+                return PlayMsg_S2P(msg,len);
         default:
                 break;
         }
@@ -455,7 +492,7 @@ bool MIDI_Available(void)  {
 }
 
 /* SOFTMPU: Initialisation */
-void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,OutputMode outputmode,bool delaysysex,bool fakeallnotesoff){
+void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,Bitu parallelport,OutputMode outputmode,bool delaysysex,bool fakeallnotesoff){
         Bitu i; /* SOFTMPU */
 	midi.sysex.delay = 0;
 	midi.sysex.start = 0;
@@ -469,6 +506,7 @@ void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,OutputMode outputmode,bo
 	midi.mpuport=mpuport;
         midi.sbport=sbport;
         midi.serialport=serialport;
+        midi.parallelport=parallelport;
 	midi.status=0x00;
 	midi.cmd_pos=0;
 	midi.cmd_len=0;

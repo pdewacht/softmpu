@@ -428,3 +428,48 @@ DetectSerial:   ; Find the BIOS address of the specified COM port
                 out             dx,al
                 pop             ax
 @@NoConfig:     retn
+
+DetectParallel: ; Find the BIOS address of the specified LPT port
+                ; Input LPT number in al
+                ; Output port address in ax (0=not present)
+                push            ds
+                mov             bx,040h
+                mov             ds,bx
+                add             al,3
+                mov             bl,2
+                mul             bl                      ; Calculate the offset
+                push            si
+                mov             si,ax
+                mov             ax,[si]                 ; Get port address from BIOS
+                pop             si
+                pop             ds
+
+                ; Put the S2P in parallel mode
+                cmp             ax,0
+                je              @@NoConfigS2P
+                push            ax
+                mov             dx,ax
+                inc             dx                      ; Write command 0x3F
+                inc             dx
+                mov             al,02h
+                out             dx,al
+                dec             dx
+                dec             dx
+                mov             al,03Fh
+                out             dx,al
+                inc             dx
+                inc             dx
+                mov             al,06h
+                out             dx,al
+                in              al,dx                   ; Delay 3.5 microseconds
+                in              al,dx
+                in              al,dx
+                in              al,dx
+                in              al,dx
+                in              al,dx
+                mov             al,0Fh                  ; Discard reply byte
+                out             dx,al
+                mov             al,07h
+                out             dx,al
+                pop             ax
+@@NoConfigS2P:  retn

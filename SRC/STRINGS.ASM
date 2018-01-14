@@ -63,6 +63,10 @@ COMError        DB              '! Error: Serial interface not detected',0Dh,0Ah
 COMSuccessStart DB              0FBh,' Serial interface detected at port ','$'
 COMSuccessEnd   DB              0Dh,0Ah,'$'
 COMPortNum      DB              '   ','$'
+LPTError        DB              '! Error: Parallel interface not detected',0Dh,0Ah,'$'
+LPTSuccessStart DB              0FBh,' Parallel interface detected at port ','$'
+LPTSuccessEnd   DB              0Dh,0Ah,'$'
+LPTPortNum      DB              '   ','$'
 SBMIDIEnabled   DB              'i SB-MIDI mode enabled',0Dh,0Ah,'$'
 DelaysEnabled   DB              'i SYSEX delays enabled',0Dh,0Ah,'$'
 FakeEnabled     DB              'i Simulated "All Notes Off" enabled',0Dh,0Ah,'$'
@@ -79,6 +83,7 @@ HelpText        DB              'Usage: SOFTMPU /MPU:nnn [/SB:nnn /IRQ:nn] [/OUT
                 DB              '  /OUTPUT:     Use alternate output mode',0Dh,0Ah
                 DB              '  outputs        SBMIDI  Sound Blaster MIDI',0Dh,0Ah
                 DB              '                 COMn    Serial interface (1-4)',0Dh,0Ah
+                DB              '                 LPTn    S2P on parallel interface (1-3)',0Dh,0Ah
                 DB              '  /DELAYSYSEX  Prevent Rev.0 MT-32 buffer overflow',0Dh,0Ah
                 DB              '  /RA50        Simulate "All Notes Off" for Roland RA-50',0Dh,0Ah,'$'
 EMMDevice       DB              'EMMXXXX0',00h

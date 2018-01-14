@@ -73,6 +73,10 @@ Init:           ; Ensure ds=cs
                 je              @@SerialParam
                 cmp             eax,'moc:'
                 je              @@SerialParam
+                cmp             eax,'TPL:'
+                je              @@LptParam
+                cmp             eax,'tpl:'
+                je              @@LptParam
                 cmp             eax,'MBS:'
                 je              @@EnableSBMIDI
                 cmp             eax,'mbs:'
@@ -158,6 +162,22 @@ Init:           ; Ensure ds=cs
                 call            DetectSerial
                 mov             es:SerialPortAddr,ax    ; Set port address
                 mov             es:OutMode,M_SERIAL     ; Select serial output mode
+                jmp             @@NextParam
+@@LptParam:     cmp             cx,5                    ; Command plus 1-digit port
+                jl              @@NextParam             ; Not enough chars left
+                mov             al,[si]                 ; 1st hex digit
+                call            CharToNum
+
+                ; Check we've got a valid parallel port number
+                cmp             al,1
+                jl              @@NextParam
+                cmp             al,3
+                jg              @@NextParam
+
+                ; Get the parallel port base address from the BIOS
+                call            DetectParallel
+                mov             es:LptPortAddr,ax       ; Set port address
+                mov             es:OutMode,M_S2P        ; Select parallel/S2P output mode
 @@NextParam:    sub             si,3                    ; Only step a byte at a time
                 dec             cx
                 cmp             cx,0
@@ -175,9 +195,12 @@ Init:           ; Ensure ds=cs
                 jle             @@SBPortOK
 
 @@SBPortNotOK:  ; The SB port was out of range
-                ; That's only OK if we're in serial mode
+                ; That's only OK if we're in serial or parallel mode
                 cmp             es:OutMode,M_SERIAL
+                je              @@ClearSBPort
+                cmp             es:OutMode,M_S2P
                 jne             PrintHelp
+@@ClearSBPort:
                 mov             es:SBPortAddr,0
 
 @@SBPortOK:     ; Write the port addresses into our strings
@@ -223,6 +246,20 @@ Init:           ; Ensure ds=cs
 		and             al,0Fh
 		call            NumToChar
                 mov             COMPortNum+2,al
+                mov             bx,es:LptPortAddr
+                mov             ax,bx
+                shr             ax,8
+                call            NumToChar
+                mov             LPTPortNum,al
+                mov             ax,bx
+                shr             ax,4
+                and             al,0Fh
+                call            NumToChar
+                mov             LPTPortNum+1,al
+                mov             ax,bx
+                and             al,0Fh
+                call            NumToChar
+                mov             LPTPortNum+2,al
 
 		; Check we have a valid IRQ
 		cmp             es:SBIRQ,2
@@ -231,9 +268,12 @@ Init:           ; Ensure ds=cs
                 jle             @@SBIRQOK
 
 @@SBIRQNotOK:   ; The SB IRQ was out of range
-                ; That's only OK if we're in serial mode
+                ; That's only OK if we're in serial or parallel mode
                 cmp             es:OutMode,M_SERIAL
+                je              @@ClearSBIRQ
+                cmp             es:OutMode,M_S2P
                 jne             PrintHelp
+@@ClearSBIRQ:
                 mov             es:SBIRQ,0
                 mov             es:SBPortAddr,0         ; Zero the SB port too
 
@@ -407,7 +447,27 @@ Init:           ; Ensure ds=cs
                 mov             dx,OFFSET MPUIRQDisabled
                 int             021h
 
-@@NoSerial:     ; Only init SB when required
+@@NoSerial:     ; Only init parallel interface when required
+                cmp             es:OutMode,M_S2P
+                jne             @@NoParallel
+                mov             ah,9
+                cmp             es:LptPortAddr,0
+                jne             @@ParallelOK
+                mov             dx,OFFSET LPTError
+                int             021h
+                jmp             Terminate
+@@ParallelOK:   mov             dx,OFFSET LPTSuccessStart
+                int             021h
+                mov             dx,OFFSET LPTPortNum
+                int             021h
+                mov             dx,OFFSET LPTSuccessEnd
+                int             021h
+                cmp             es:SBPortAddr,0
+                jne             @@NoParallel
+                mov             dx,OFFSET MPUIRQDisabled
+                int             021h
+
+@@NoParallel:   ; Only init SB when required
                 cmp             es:SBPortAddr,0
                 je              @@NoSBMIDI
 
@@ -587,3 +647,4 @@ Terminate:      pop             ds
 		INCLUDE         strings.asm
 
 TransientSeg    ENDS
+

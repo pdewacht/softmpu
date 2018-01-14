@@ -38,6 +38,7 @@ CmdHandlerAddr  DW              OFFSET PortHandler
 SBPortAddr      DW              0                       ; Set from cmdline
 SBIRQ           DB              0                       ; Set from cmdline
 SerialPortAddr  DW              0                       ; Set from cmdline
+LptPortAddr     DW              0                       ; Set from cmdline
 DelaySysex      DB              0                       ; Set from cmdline
 FakeAllNotesOff DB              0                       ; Set from cmdline
 
@@ -134,7 +135,7 @@ Start:          push            es
 		mov             es,ax                   ; Copy cs->es for var access from init
 		jmp             FAR PTR EMMErr          ; Fail
 
-@@InitSoftMPU:  INVOKE          MPU401_Init,QPIEntry,SBPortAddr,SBIRQ,MPUDataPortAddr,SerialPortAddr,OutMode,DelaySysex,FakeAllNotesOff
+@@InitSoftMPU:  INVOKE          MPU401_Init,QPIEntry,SBPortAddr,SBIRQ,MPUDataPortAddr,SerialPortAddr,LptPortAddr,OutMode,DelaySysex,FakeAllNotesOff
 		push            es
 		mov             ax,cs
 		mov             es,ax                   ; Copy cs->es for var access from init
