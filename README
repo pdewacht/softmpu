@@ -4,8 +4,10 @@ SoftMPU 1.9 - Software MPU-401 Emulator
 Copyright (C) 2013-2014  bjt, elianda
 Copyright (C) 2002-2013  The DOSBox Team
 ----------------------------------------
+Modified for DreamBlaster S2P
+----------------------------------------
 
-Release Notes (16/06/14)
+Release Notes
 
 WHAT IS IT?
 
@@ -25,8 +27,20 @@ work with the basic MIDI interfaces found on sound cards.
 REQUIREMENTS
 
 - EMM386 4.46+ (MS-DOS 6.2) or QEMM 7.03+
+- DreamBlaster S2P (parallel port MIDI)
+or:
 - Sound Blaster (or compatible) sound card (MPU-401 & SB-MIDI mode)
 - Serial port (Serial MIDI mode)
+
+USING SOFTMPU: DREAMBLASTER S2P MODE
+
+Run SoftMPU specifying the parallel interface to be used and the base port
+address of the MPU-401 interface, e.g.
+
+  SOFTMPU.EXE /MPU:330 /OUTPUT:LPT1
+
+A Sound Blaster base port address and IRQ can optionally be specified if
+MPU-401 interrupts are required.
 
 USING SOFTMPU: MPU-401 & SB-MIDI MODE
 
@@ -48,7 +62,7 @@ address of the MPU-401 interface, e.g.
 
 A Sound Blaster base port address and IRQ can optionally be specified if
 MPU-401 interrupts are required.
-  
+
 FURTHER OPTIONS
 
 The optional /DELAYSYSEX switch enables small transmission delays to prevent
