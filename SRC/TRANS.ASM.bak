@@ -85,16 +85,12 @@ Init:           ; Ensure ds=cs
 		je              @@EnableDelay
 		cmp             eax,'led/'
                 je              @@EnableDelay
-				cmp				eax, '3TM/'
-				je				@@EnableMT32
                 cmp             eax,'5AR/'
                 je              @@EnableFakeOff
                 cmp             eax,'5ar/'
 		jne             @@NextParam
 @@EnableFakeOff:mov             es:FakeAllNotesOff,1    ; Enable simulated "All Notes Off"
                 jmp             @@NextParam
-@@EnableMT32:	mov				es:Mt32Mode,1			; Enable MT-32 compatibility for S2P
-				jmp				@@NextParam
 @@EnableDelay:  mov             es:DelaySysex,1         ; Enable sysex delays
 		jmp             @@NextParam
 @@EnableSBMIDI: mov             es:OutMode,M_SBMIDI     ; Enable SB-MIDI mode
