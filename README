@@ -39,6 +39,10 @@ address of the MPU-401 interface, e.g.
 
   SOFTMPU.EXE /MPU:330 /OUTPUT:LPT1
 
+To enable MT-32 compatibility, add the /MT32 to the command line, e.g.
+
+  SOFTMPU.EXE /MPU:330 /OUTPUT:LPT1 /MT32
+
 A Sound Blaster base port address and IRQ can optionally be specified if
 MPU-401 interrupts are required.
 
