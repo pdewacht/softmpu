@@ -52,7 +52,7 @@ void PIC_SetIRQMask(Bitu irq,bool masked);
 void PIC_AddEvent(EventID event,Bitu delay);
 void PIC_RemoveEvents(EventID event);
 
-void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,Bitu parallelport,OutputMode outputmode,bool delaysysex,bool fakeallnotesoff);
+void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,Bitu parallelport,OutputMode outputmode,bool delaysysex,bool fakeallnotesoff,bool mt32Mode);
 void MIDI_RawOutByte(Bit8u data);
 bool MIDI_Available(void);
 
@@ -765,7 +765,7 @@ void MPU401_SetEnableMPUVerFix(bool enable)
 }
 
 /* SOFTMPU: Initialisation */
-void MPU401_Init(void far* qpientry,Bitu sbport,Bitu irq,Bitu mpuport,Bitu serialport,Bitu parallelport,OutputMode outputmode,bool delaysysex,bool fakeallnotesoff)
+void MPU401_Init(void far* qpientry,Bitu sbport,Bitu irq,Bitu mpuport,Bitu serialport,Bitu parallelport,OutputMode outputmode,bool delaysysex,bool fakeallnotesoff,bool mt32Mode)
 {
         /* Store QEMM parameters */
         qemm.installed=(NULL!=qpientry);
@@ -775,7 +775,7 @@ void MPU401_Init(void far* qpientry,Bitu sbport,Bitu irq,Bitu mpuport,Bitu seria
 	PIC_Init();
 
 	/* Initialise MIDI handler */
-        MIDI_Init(mpuport,sbport,serialport,parallelport,outputmode,delaysysex,fakeallnotesoff);
+        MIDI_Init(mpuport,sbport,serialport,parallelport,outputmode,delaysysex,fakeallnotesoff,mt32Mode);
 	if (!MIDI_Available()) return;
 
 	mpu.queue_used=0;
