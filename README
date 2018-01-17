@@ -39,7 +39,7 @@ address of the MPU-401 interface, e.g.
 
   SOFTMPU.EXE /MPU:330 /OUTPUT:LPT1
   
-To enable MT-32 compatibility, add the /MT32 to the command line, e.g.
+To enable MT-32 compatibility, add the /MT32 switch to the command line, e.g.
 
   SOFTMPU.EXE /MPU:330 /OUTPUT:LPT1 /MT32
 

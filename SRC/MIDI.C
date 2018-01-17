@@ -123,6 +123,7 @@ Bitu MIDI_sysex_delay;
 /* SOFTMPU: Also used by MPU401_ReadStatus */
 OutputMode MIDI_output_mode;
 
+/* SOFTMPU: Enable MT32 emulation for S2P */
 bool MT32_mode = false;
 
 /* SOFTMPU: Initialised in mpu401.c */
@@ -330,21 +331,24 @@ static void PlayMsg(Bit8u* msg,Bitu len)
                 }
                 break;
         case M_SBMIDI:
-                return PlayMsg_SBMIDI(msg,len);
+                PlayMsg_SBMIDI(msg,len);
+				break;
         case M_SERIAL:
-                return PlayMsg_Serial(msg,len);
+                PlayMsg_Serial(msg,len);
+				break;
         case M_S2P:
-				if (MT32_mode && (msg[0] & 0xF0) == 0xC0)
-				{
-					// Insert MT-32 command, CC 0 = 127
-					static Bit8u MT32[] = { 0xB0, 0, 127 };
-					
-					// Set proper channel
-					MT32[0] = 0xB0 | (msg[0] & 0x0F);
-					
-					PlayMsg_S2P(MT32, 3);
-				}
-                return PlayMsg_S2P(msg,len);
+                if (MT32_mode && (msg[0] & 0xF0) == 0xC0)
+                {
+                        // Insert MT-32 command, CC 0 = 127
+                        static Bit8u MT32[] = { 0xB0, 0, 127 };
+
+                        // Set proper channel
+                        MT32[0] = 0xB0 | (msg[0] & 0x0F);
+
+                        PlayMsg_S2P(MT32, 3);
+                }
+                PlayMsg_S2P(msg,len);
+				break;
         default:
                 break;
         }
@@ -525,7 +529,7 @@ void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,Bitu parallelport,Output
         midi.fakeallnotesoff=fakeallnotesoff;
         midi.available=true;
         MIDI_output_mode=outputmode;
-		MT32_mode = mt32Mode;
+        MT32_mode = mt32Mode;
 
         /* SOFTMPU: Display welcome message on MT-32 */
         for (i=0;i<30;i++)

@@ -43,7 +43,7 @@ DelaySysex      DB              0                       ; Set from cmdline
 FakeAllNotesOff DB              0                       ; Set from cmdline
 
 OutMode         OutputMode      M_MPU401                ; MIDI output mode control
-Mt32Mode		DB				0						; Set from cmdline
+Mt32Mode        DB              0                       ; Set from cmdline
 
 VirtualisePorts DB              0                       ; Port virtualisation control
 SBEOI           DB              1                       ; SB ISR EOI control

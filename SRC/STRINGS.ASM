@@ -67,6 +67,7 @@ LPTError        DB              '! Error: Parallel interface not detected',0Dh,0
 LPTSuccessStart DB              0FBh,' Parallel interface detected at port ','$'
 LPTSuccessEnd   DB              0Dh,0Ah,'$'
 LPTPortNum      DB              '   ','$'
+MT32Enabled     DB              'i MT-32 compatibility mode enabled',0Dh,0Ah,'$'
 SBMIDIEnabled   DB              'i SB-MIDI mode enabled',0Dh,0Ah,'$'
 DelaysEnabled   DB              'i SYSEX delays enabled',0Dh,0Ah,'$'
 FakeEnabled     DB              'i Simulated "All Notes Off" enabled',0Dh,0Ah,'$'
