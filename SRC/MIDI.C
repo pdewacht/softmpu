@@ -331,9 +331,11 @@ static void PlayMsg(Bit8u* msg,Bitu len)
                 }
                 break;
         case M_SBMIDI:
-                return PlayMsg_SBMIDI(msg,len);
+                PlayMsg_SBMIDI(msg,len);
+				break;
         case M_SERIAL:
-                return PlayMsg_Serial(msg,len);
+                PlayMsg_Serial(msg,len);
+				break;
         case M_S2P:
                 if (MT32_mode && (msg[0] & 0xF0) == 0xC0)
                 {
@@ -345,7 +347,8 @@ static void PlayMsg(Bit8u* msg,Bitu len)
 
                         PlayMsg_S2P(MT32, 3);
                 }
-                return PlayMsg_S2P(msg,len);
+                PlayMsg_S2P(msg,len);
+				break;
         default:
                 break;
         }

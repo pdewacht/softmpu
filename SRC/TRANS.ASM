@@ -87,6 +87,8 @@ Init:           ; Ensure ds=cs
                 je              @@EnableDelay
                 cmp             eax, '3TM/'
                 je              @@EnableMT32
+                cmp             eax, '3tm/'
+                je              @@EnableMT32
                 cmp             eax,'5AR/'
                 je              @@EnableFakeOff
                 cmp             eax,'5ar/'
@@ -466,6 +468,11 @@ Init:           ; Ensure ds=cs
                 int             021h
                 mov             dx,OFFSET LPTSuccessEnd
                 int             021h
+				cmp             es:Mt32Mode,0
+				je              @@NoMT32
+				mov             dx,OFFSET MT32Enabled
+				int             021h
+@@NoMT32:
                 cmp             es:SBPortAddr,0
                 jne             @@NoParallel
                 mov             dx,OFFSET MPUIRQDisabled
