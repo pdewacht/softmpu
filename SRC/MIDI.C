@@ -337,16 +337,6 @@ static void PlayMsg(Bit8u* msg,Bitu len)
                 PlayMsg_Serial(msg,len);
 				break;
         case M_S2P:
-                if (MT32_mode && (msg[0] & 0xF0) == 0xC0)
-                {
-                        // Insert MT-32 command, CC 0 = 127
-                        static Bit8u MT32[] = { 0xB0, 0, 127 };
-
-                        // Set proper channel
-                        MT32[0] = 0xB0 | (msg[0] & 0x0F);
-
-                        PlayMsg_S2P(MT32, 3);
-                }
                 PlayMsg_S2P(msg,len);
 				break;
         default:
@@ -466,6 +456,17 @@ void MIDI_RawOutByte(Bit8u data) {
 			/*if (CaptureState & CAPTURE_MIDI) {
 				CAPTURE_AddMidi(false, midi.cmd_len, midi.cmd_buf);
                         }*/ /* SOFTMPU */
+						
+                        if (MT32_mode && (midi.status & 0xF0) == 0xC0)
+						{
+                                // Insert MT-32 command, CC 0 = 127
+                                static Bit8u MT32[] = { 0xB0, 0, 127 };
+
+                                // Set proper channel
+                                MT32[0] = 0xB0 | (midi.status & 0x0F);
+
+                                PlayMsg(MT32, 3);
+                        }
 
                         if (midi.fakeallnotesoff)
                         {
