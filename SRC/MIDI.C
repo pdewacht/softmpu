@@ -508,6 +508,30 @@ bool MIDI_Available(void)  {
 	return midi.available;
 }
 
+typedef struct {
+	Bit8u channel;
+	Bit8u program;
+} ChannelProgram;
+
+ChannelProgram channelPart[] = {
+	{ 2, 68 },
+	{ 3, 48 },
+	{ 4, 95 },
+	{ 5, 78 },
+	{ 6, 41 },
+	{ 7, 3 },
+	{ 8, 110 },
+	{ 9, 122 },
+	{ 10, 127 },
+	{ 1, 0 },
+	{ 11, 0 },
+	{ 12, 0 },
+	{ 13, 0 },
+	{ 14, 0 },
+	{ 15, 0 },
+	{ 16, 0 }
+};
+
 /* SOFTMPU: Initialisation */
 void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,Bitu parallelport,OutputMode outputmode,bool delaysysex,bool fakeallnotesoff,bool mt32Mode){
         Bitu i; /* SOFTMPU */
@@ -544,6 +568,26 @@ void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,Bitu parallelport,Output
                 tracked_channels[i].used=0;
                 tracked_channels[i].next=0;
         }
+		
+		/* Initialize MT-32 mode for DreamBlaster S2(P) */
+		if (MT32_mode)
+		{
+			// Insert MT-32 command, CC 0 = 127
+			static Bit8u MT32[] = { 0xB0, 0, 127, 0xC0, 0 };
+			unsigned int i;
+
+			for (i = 0; i < (sizeof(channelPart)/sizeof(channelPart[0])); i++)
+			{
+				// Set proper channel
+				MT32[0] = 0xB0 | (channelPart[i].channel - 1);
+				MT32[3] = 0xC0 | (channelPart[i].channel - 1);
+
+				// Set proper program
+				MT32[4] = channelPart[i].program;
+				
+				PlayMsg(MT32, 5);
+			}
+		}
 }
 
 /* DOSBox initialisation code */
