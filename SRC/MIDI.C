@@ -572,9 +572,16 @@ void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,Bitu parallelport,Output
 		/* Initialize MT-32 mode for DreamBlaster S2(P) */
 		if (MT32_mode)
 		{
+			unsigned int i;
+
 			// Insert MT-32 command, CC 0 = 127
 			static Bit8u MT32[] = { 0xB0, 0, 127, 0xC0, 0 };
-			unsigned int i;
+			static Bit8u MT32_PB[] = { 
+				0xB0, 0x65, 0x00, // 101 00 MSB
+				0xB0, 0x64, 0x00, // 100 00 LSB
+				0xB0, 0x06, 0x0C, //  06 12 MSB
+				0xB0, 0x26, 0x00  //  38 00 LSB
+			};
 
 			for (i = 0; i < (sizeof(channelPart)/sizeof(channelPart[0])); i++)
 			{
@@ -586,6 +593,18 @@ void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,Bitu parallelport,Output
 				MT32[4] = channelPart[i].program;
 				
 				PlayMsg(MT32, 5);
+			}
+			
+			// Adjust pitch-bend range
+			for (i = 0; i < 16; i++)
+			{
+				// Set proper channel
+				MT32_PB[0] = 0xB0 | i;
+				MT32_PB[3] = 0xB0 | i;
+				MT32_PB[6] = 0xB0 | i;
+				MT32_PB[9] = 0xB0 | i;
+				
+				PlayMsg(MT32_PB, 12);
 			}
 		}
 }
