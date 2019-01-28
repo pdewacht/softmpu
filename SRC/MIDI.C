@@ -337,16 +337,6 @@ static void PlayMsg(Bit8u* msg,Bitu len)
                 PlayMsg_Serial(msg,len);
 				break;
         case M_S2P:
-                if (MT32_mode && (msg[0] & 0xF0) == 0xC0)
-                {
-                        // Insert MT-32 command, CC 0 = 127
-                        static Bit8u MT32[] = { 0xB0, 0, 127 };
-
-                        // Set proper channel
-                        MT32[0] = 0xB0 | (msg[0] & 0x0F);
-
-                        PlayMsg_S2P(MT32, 3);
-                }
                 PlayMsg_S2P(msg,len);
 				break;
         default:
@@ -466,6 +456,17 @@ void MIDI_RawOutByte(Bit8u data) {
 			/*if (CaptureState & CAPTURE_MIDI) {
 				CAPTURE_AddMidi(false, midi.cmd_len, midi.cmd_buf);
                         }*/ /* SOFTMPU */
+						
+                        if (MT32_mode && (midi.status & 0xF0) == 0xC0)
+						{
+                                // Insert MT-32 command, CC 0 = 127
+                                static Bit8u MT32[] = { 0xB0, 0, 127 };
+
+                                // Set proper channel
+                                MT32[0] = 0xB0 | (midi.status & 0x0F);
+
+                                PlayMsg(MT32, 3);
+                        }
 
                         if (midi.fakeallnotesoff)
                         {
@@ -507,6 +508,30 @@ bool MIDI_Available(void)  {
 	return midi.available;
 }
 
+typedef struct {
+	Bit8u channel;
+	Bit8u program;
+} ChannelProgram;
+
+ChannelProgram channelPart[] = {
+	{ 2, 68 },
+	{ 3, 48 },
+	{ 4, 95 },
+	{ 5, 78 },
+	{ 6, 41 },
+	{ 7, 3 },
+	{ 8, 110 },
+	{ 9, 122 },
+	{ 10, 127 },
+	{ 1, 0 },
+	{ 11, 0 },
+	{ 12, 0 },
+	{ 13, 0 },
+	{ 14, 0 },
+	{ 15, 0 },
+	{ 16, 0 }
+};
+
 /* SOFTMPU: Initialisation */
 void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,Bitu parallelport,OutputMode outputmode,bool delaysysex,bool fakeallnotesoff,bool mt32Mode){
         Bitu i; /* SOFTMPU */
@@ -543,6 +568,45 @@ void MIDI_Init(Bitu mpuport,Bitu sbport,Bitu serialport,Bitu parallelport,Output
                 tracked_channels[i].used=0;
                 tracked_channels[i].next=0;
         }
+		
+		/* Initialize MT-32 mode for DreamBlaster S2(P) */
+		if (MT32_mode)
+		{
+			unsigned int i;
+
+			// Insert MT-32 command, CC 0 = 127
+			static Bit8u MT32[] = { 0xB0, 0, 127, 0xC0, 0 };
+			static Bit8u MT32_PB[] = { 
+				0xB0, 0x65, 0x00, // 101 00 MSB
+				0xB0, 0x64, 0x00, // 100 00 LSB
+				0xB0, 0x06, 0x0C, //  06 12 MSB
+				0xB0, 0x26, 0x00  //  38 00 LSB
+			};
+
+			for (i = 0; i < (sizeof(channelPart)/sizeof(channelPart[0])); i++)
+			{
+				// Set proper channel
+				MT32[0] = 0xB0 | (channelPart[i].channel - 1);
+				MT32[3] = 0xC0 | (channelPart[i].channel - 1);
+
+				// Set proper program
+				MT32[4] = channelPart[i].program;
+				
+				PlayMsg(MT32, 5);
+			}
+			
+			// Adjust pitch-bend range
+			for (i = 0; i < 16; i++)
+			{
+				// Set proper channel
+				MT32_PB[0] = 0xB0 | i;
+				MT32_PB[3] = 0xB0 | i;
+				MT32_PB[6] = 0xB0 | i;
+				MT32_PB[9] = 0xB0 | i;
+				
+				PlayMsg(MT32_PB, 12);
+			}
+		}
 }
 
 /* DOSBox initialisation code */

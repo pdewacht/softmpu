@@ -87,7 +87,7 @@ HelpText        DB              'Usage: SOFTMPU /MPU:nnn [/SB:nnn /IRQ:nn] [/OUT
                 DB              '                 LPTn    S2P on parallel interface (1-3)',0Dh,0Ah
                 DB              '  /DELAYSYSEX  Prevent Rev.0 MT-32 buffer overflow',0Dh,0Ah
                 DB              '  /RA50        Simulate "All Notes Off" for Roland RA-50',0Dh,0Ah
-                DB              '  /MT32        Enable MT-32 compatibility for S2P',0Dh,0Ah,'$'
+                DB              '  /MT32        Enable MT-32 compatibility for DreamBlaster S2(P)',0Dh,0Ah,'$'
 EMMDevice       DB              'EMMXXXX0',00h
 EMMDevice2      DB              'EMMQXXX0',00h
 QEMMDevice      DB              'QEMM386$',00h
